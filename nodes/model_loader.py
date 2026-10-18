@@ -2,13 +2,13 @@ import hashlib
 import os
 import torch
 from huggingface_hub import snapshot_download
-from transformers import AutoModel, AutoProcessor
+from transformers import AutoModel
 
 import comfy.model_management as mm
 import folder_paths
 
 from ..utils.constants import MODEL_VARIANTS, DEFAULT_CODEC_PATH, SAMPLE_RATE
-from ..utils import backend
+from ..utils import backend, compat
 
 MODEL_ID_TTSD = "OpenMOSS-Team/MOSS-TTSD-v1.0"
 MODEL_ID_VOICE_GENERATOR = "OpenMOSS-Team/MOSS-VoiceGenerator"
@@ -77,21 +77,23 @@ class MossTTSModelLoader:
         # Path(repo_id) bug on Windows (converts / to \)
         local_dir = _resolve_local_dir(model_path)
 
-        processor_kwargs = {"trust_remote_code": True}
+        processor_kwargs = {}
         if model_id == MODEL_ID_TTSD:
             codec_path = codec_local_path.strip() or DEFAULT_CODEC_PATH
             processor_kwargs["codec_path"] = _resolve_local_dir(codec_path)
         elif model_id == MODEL_ID_VOICE_GENERATOR:
             processor_kwargs["normalize_inputs"] = True
 
-        processor = AutoProcessor.from_pretrained(local_dir, **processor_kwargs)
+        # Bypasses AutoProcessor, which on transformers >= 5.20 injects kwargs
+        # the MOSS remote processor cannot accept. See utils/compat.py.
+        processor = compat.load_processor(local_dir, **processor_kwargs)
         processor.audio_tokenizer = processor.audio_tokenizer.to(device)
 
         model = AutoModel.from_pretrained(
             local_dir,
             trust_remote_code=True,
             attn_implementation=attn_implementation,
-            torch_dtype=dtype,
+            dtype=dtype,
         ).to(device)
         model.eval()
 

@@ -73,7 +73,7 @@ class MossTTSVoiceDesign:
 
         with torch.no_grad():
             outputs = run_generation(
-                model, input_ids, attention_mask, model_id, processor,
+                model, input_ids, attention_mask, model_id,
                 temperature, top_p, top_k, repetition_penalty, max_new_tokens,
             )
 

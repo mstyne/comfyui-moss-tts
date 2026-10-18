@@ -33,7 +33,7 @@ git clone https://github.com/richservo/comfyui-moss-tts
 pip install -r ComfyUI/custom_nodes/comfyui-moss-tts/requirements.txt
 ```
 
-> **Note:** `transformers>=5.0.0` is required. Earlier versions may fail to load the MOSS model architecture. `torch` and `torchaudio` are not listed in requirements because ComfyUI provides them.
+> **Note:** `transformers>=5.20.0` is required and 5.20.x is the tested version. Earlier versions may fail to load the MOSS model architecture. `torch` and `torchaudio` are not listed in requirements because ComfyUI provides them.
 
 **3. Restart ComfyUI.**
 
