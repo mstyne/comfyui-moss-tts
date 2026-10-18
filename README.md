@@ -49,13 +49,17 @@ Models download automatically from HuggingFace on first use and are cached to `C
 |---|---|---|---|---|
 | MOSS-TTS (Delay 8B) | `OpenMOSS-Team/MOSS-TTS` | Delay 8B | ~18 GB | Slow on single GPU |
 | MOSS-TTS (Local 1.7B) | `OpenMOSS-Team/MOSS-TTS-Local-Transformer` | Local 1.7B | ~5 GB | Fast; recommended for daily use |
+| MOSS-TTS v1.5 (Delay 8B) | `OpenMOSS-Team/MOSS-TTS-v1.5` | Delay 8B | ~18 GB | 31 languages; slow on single GPU |
+| MOSS-TTS v1.5 (Local 4B, 48kHz stereo) | `OpenMOSS-Team/MOSS-TTS-Local-Transformer-v1.5` | Local 4B | ~10 GB | Fast; 48 kHz stereo output via Audio-Tokenizer-v2 |
 | MOSS-TTSD v1.0 | `OpenMOSS-Team/MOSS-TTSD-v1.0` | Delay 8B | ~18 GB | Slow on single GPU |
 | MOSS-VoiceGenerator | `OpenMOSS-Team/MOSS-VoiceGenerator` | Delay 8B | ~18 GB | Slow on single GPU |
 | MOSS-SoundEffect | `OpenMOSS-Team/MOSS-SoundEffect` | Delay 8B | ~18 GB | Slow on single GPU |
 
 **MOSS-TTS (Local 1.7B)** is the only model that is fast enough for practical iterative use on a single consumer GPU. All other models use the Delay 8B architecture and are significantly slower.
 
-The **Audio Tokenizer** (`OpenMOSS-Team/MOSS-Audio-Tokenizer`) is a shared codec required by all models. It downloads automatically alongside whichever model you load first.
+The **Audio Tokenizer** (`OpenMOSS-Team/MOSS-Audio-Tokenizer`) is a shared codec required by all 24 kHz models. **MOSS-TTS v1.5 (Local)** instead uses `OpenMOSS-Team/MOSS-Audio-Tokenizer-v2` (48 kHz, stereo, ~8.5 GB). The right codec downloads automatically alongside whichever model you load.
+
+The v1.5 models expect full language names in the prompt ("English") rather than codes ("en"); the nodes translate the language dropdown automatically.
 
 ---
 
@@ -71,13 +75,14 @@ Loads a MOSS-TTS model and processor into a pipeline object (`MOSS_TTS_PIPE`) th
 |---|---|---|---|
 | `model_variant` | Dropdown | MOSS-TTS (Delay 8B) | Which model to load |
 | `local_model_path` | String | _(empty)_ | Absolute path to a local model directory. Leave empty to auto-download from HuggingFace |
-| `codec_local_path` | String | _(empty)_ | Absolute path to a local Audio Tokenizer directory (relevant for MOSS-TTSD). Leave empty to auto-download |
+| `codec_local_path` | String | _(empty)_ | Absolute path to a local Audio Tokenizer directory. Leave empty to auto-download the codec that matches the selected model |
+| `check_for_updates` | Boolean | True | Contact HuggingFace on every load to sync the model and codec to the latest revision. Turn off to use the existing download in `models/moss-tts/` without any network access |
 
 **Output:** `MOSS_TTS_PIPE`
 
 **Notes:**
 - Calls `mm.unload_all_models()` before loading to free VRAM.
-- Models are cached to `ComfyUI/models/moss-tts/` on first download.
+- Models are cached to `ComfyUI/models/moss-tts/` on first download. With `check_for_updates` off, a model is only downloaded if it is not there yet.
 - The node uses an MD5 hash of its inputs to detect changes and avoid unnecessary reloads.
 
 ---

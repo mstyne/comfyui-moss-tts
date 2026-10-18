@@ -2,7 +2,7 @@ import torch
 import comfy.model_management as mm
 
 from ..utils.audio_utils import apply_handles, moss_tensor_to_comfyui_audio
-from ..utils.backend import run_generation
+from ..utils.backend import language_tag, run_generation
 
 VOICE_GENERATOR_MODEL_ID = "OpenMOSS-Team/MOSS-VoiceGenerator"
 
@@ -59,7 +59,7 @@ class MossTTSVoiceDesign:
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
 
-        lang = None if language == "auto" else language
+        lang = language_tag(model_id, language)
 
         user_msg = processor.build_user_message(
             text=text,

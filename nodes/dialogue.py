@@ -9,7 +9,7 @@ from ..utils.audio_utils import (
     moss_tensor_to_comfyui_audio,
     resample_if_needed,
 )
-from ..utils.backend import run_generation
+from ..utils.backend import language_tag, run_generation
 
 TTSD_MODEL_ID = "OpenMOSS-Team/MOSS-TTSD-v1.0"
 
@@ -203,7 +203,7 @@ class MossTTSDialogue:
             clone_wavs.append(wav)
             prompt_text_map[speaker_id] = _normalize_prompt_text(prompt_text, speaker_id)
 
-        lang = None if language == "auto" else language
+        lang = language_tag(model_id, language)
 
         if not cloned_speakers:
             # Generation mode — no reference audio for any speaker

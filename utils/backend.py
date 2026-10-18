@@ -8,24 +8,39 @@ torch.backends.cuda.enable_mem_efficient_sdp(True)
 torch.backends.cuda.enable_math_sdp(True)
 
 
-LOCAL_MODEL_IDS = {
+from .constants import LANGUAGE_NAMES, V15_MODEL_IDS
+
+# The 1.0 Local-Transformer drives generation through HF GenerationMixin and
+# needs the transformers 5.x shims in utils/compat.py.  Every other model,
+# including Local-Transformer v1.5, ships its own self-contained generate().
+LEGACY_LOCAL_MODEL_IDS = {
     "OpenMOSS-Team/MOSS-TTS-Local-Transformer",
 }
 
 
-def is_local_model(model_id):
-    """Local models use HF GenerationMixin with a custom generation_config.
-    Delay models use a custom generate() with audio_* kwargs."""
-    return model_id in LOCAL_MODEL_IDS
+def is_legacy_local_model(model_id):
+    return model_id in LEGACY_LOCAL_MODEL_IDS
+
+
+def language_tag(model_id, language):
+    """Translate the node's language choice into what the model was trained on.
+
+    Returns None for "auto" so the prompt renders the field as unset.
+    """
+    if language == "auto":
+        return None
+    if model_id in V15_MODEL_IDS:
+        return LANGUAGE_NAMES.get(language, language)
+    return language
 
 
 def run_generation(model, input_ids, attention_mask, model_id,
                    temperature, top_p, top_k, repetition_penalty, max_new_tokens):
     """Unified generate call for the Delay and Local model APIs.
 
-    Both remote implementations now expose the same ``generate`` keyword
-    interface (``audio_*`` for the audio channels, ``text_*`` for the text
-    channel).  The Local model additionally needs a couple of transformers 5.x
+    All remote implementations expose the same ``generate`` keyword interface
+    (``audio_*`` for the audio channels, ``text_*`` for the text channel).
+    The 1.0 Local model additionally needs a couple of transformers 5.x
     workarounds; see utils/compat.py.
     """
     kwargs = dict(
@@ -38,7 +53,7 @@ def run_generation(model, input_ids, attention_mask, model_id,
         audio_repetition_penalty=repetition_penalty,
     )
 
-    if is_local_model(model_id):
+    if is_legacy_local_model(model_id):
         from transformers import DynamicCache
         from . import compat
 
