@@ -110,12 +110,3 @@ class MossTTSModelLoader:
         patcher = moss_pipe.MossModelPatcher(bundle, load_device=load_device, offload_device=offload_device)
 
         return (moss_pipe.MossPipe(patcher, processor, sample_rate, model_id),)
-
-    @classmethod
-    def IS_CHANGED(cls, model_variant, local_model_path, codec_local_path, check_for_updates=True):
-        h = hashlib.md5()
-        h.update(model_variant.encode())
-        h.update(local_model_path.encode())
-        h.update(codec_local_path.encode())
-        h.update(str(check_for_updates).encode())
-        return h.hexdigest()

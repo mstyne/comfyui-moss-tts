@@ -83,7 +83,7 @@ Loads a MOSS-TTS model and processor into a pipeline object (`MOSS_TTS_PIPE`) th
 **Notes:**
 - The model and codec are registered with ComfyUI's model manager, like a checkpoint. They are moved to the GPU when a generation node runs and evicted to system RAM when another workflow needs the VRAM, so running this suite does not slow down later workflows. "Free model and node cache" releases them fully.
 - Models are cached to `ComfyUI/models/moss-tts/` on first download. With `check_for_updates` off, a model is only downloaded if it is not there yet.
-- The node uses an MD5 hash of its inputs to detect changes and avoid unnecessary reloads.
+- ComfyUI caches the node on its inputs, so the model is only reloaded when the variant, paths, or the update toggle change.
 
 ---
 

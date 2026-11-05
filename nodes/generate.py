@@ -110,7 +110,3 @@ class MossTTSGenerate:
 
         mm.soft_empty_cache()
         return (result,)
-
-    @classmethod
-    def IS_CHANGED(cls, **kwargs):
-        return kwargs.get("seed", 0)
