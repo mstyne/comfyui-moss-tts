@@ -2,6 +2,7 @@ import torch
 import comfy.model_management as mm
 
 from ..utils.audio_utils import apply_handles, moss_tensor_to_comfyui_audio
+from ..utils import pipe
 from ..utils.backend import language_tag, run_generation
 
 VOICE_GENERATOR_MODEL_ID = "OpenMOSS-Team/MOSS-VoiceGenerator"
@@ -47,7 +48,11 @@ class MossTTSVoiceDesign:
         head_handle,
         tail_handle,
     ):
-        model, processor, sample_rate, device, model_id = moss_pipe
+        sample_rate = moss_pipe.sample_rate
+        model_id = moss_pipe.model_id
+        # Through ComfyUI's model manager, so it can evict us later. Needed
+        # before any codec use below, not just before generate().
+        model, processor, device = pipe.load(moss_pipe, max_new_tokens + 2048)
 
         if model_id != VOICE_GENERATOR_MODEL_ID:
             print(

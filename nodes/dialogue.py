@@ -9,6 +9,7 @@ from ..utils.audio_utils import (
     moss_tensor_to_comfyui_audio,
     resample_if_needed,
 )
+from ..utils import pipe
 from ..utils.backend import language_tag, run_generation
 
 TTSD_MODEL_ID = "OpenMOSS-Team/MOSS-TTSD-v1.0"
@@ -154,7 +155,11 @@ class MossTTSDialogue:
         s2_reference_audio=None,
         s2_prompt_text="",
     ):
-        model, processor, sample_rate, device, model_id = moss_pipe
+        sample_rate = moss_pipe.sample_rate
+        model_id = moss_pipe.model_id
+        # Through ComfyUI's model manager, so it can evict us later. Needed
+        # before any codec use below, not just before generate().
+        model, processor, device = pipe.load(moss_pipe, max_new_tokens + 2048)
 
         if model_id != TTSD_MODEL_ID:
             print(

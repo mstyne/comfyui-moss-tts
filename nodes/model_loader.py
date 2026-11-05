@@ -8,14 +8,10 @@ import comfy.model_management as mm
 import folder_paths
 
 from ..utils.constants import MODEL_VARIANTS, SAMPLE_RATE, default_codec_for
-from ..utils import backend, compat
+from ..utils import backend, compat, pipe as moss_pipe
 
 MODEL_ID_TTSD = "OpenMOSS-Team/MOSS-TTSD-v1.0"
 MODEL_ID_VOICE_GENERATOR = "OpenMOSS-Team/MOSS-VoiceGenerator"
-
-# Track loaded model so we can free VRAM before loading a new one
-_current_model = None
-_current_processor = None
 
 # Store models in ComfyUI's models directory under moss-tts/
 MOSS_MODELS_DIR = os.path.join(folder_paths.models_dir, "moss-tts")
@@ -57,24 +53,10 @@ class MossTTSModelLoader:
     CATEGORY = "audio/MOSS-TTS"
 
     def load_model(self, model_variant, local_model_path, codec_local_path, check_for_updates=True):
-        global _current_model, _current_processor
-
-        device = mm.get_torch_device()
-        dtype = torch.bfloat16 if str(device).startswith("cuda") else torch.float32
-        attn_implementation = backend.resolve_attn_implementation(device, dtype)
-
-        mm.unload_all_models()
-
-        # Free the previous MOSS model from VRAM
-        if _current_processor is not None:
-            if hasattr(_current_processor, "audio_tokenizer"):
-                _current_processor.audio_tokenizer.cpu()
-            _current_processor = None
-        if _current_model is not None:
-            _current_model.cpu()
-            del _current_model
-            _current_model = None
-        torch.cuda.empty_cache()
+        load_device = mm.get_torch_device()
+        offload_device = mm.unet_offload_device()
+        dtype = torch.bfloat16 if str(load_device).startswith("cuda") else torch.float32
+        attn_implementation = backend.resolve_attn_implementation(load_device, dtype)
 
         model_id = MODEL_VARIANTS[model_variant]
         model_path = local_model_path.strip() if local_model_path.strip() else model_id
@@ -93,8 +75,10 @@ class MossTTSModelLoader:
 
         # Bypasses AutoProcessor, which on transformers >= 5.20 injects kwargs
         # the MOSS remote processor cannot accept. See utils/compat.py.
+        # Weights stay on the CPU here. The generation nodes ask ComfyUI's
+        # model manager to move them to the GPU when they run, so ComfyUI can
+        # evict them again for other workflows.
         processor = compat.load_processor(local_dir, **processor_kwargs)
-        processor.audio_tokenizer = processor.audio_tokenizer.to(device)
         if attn_implementation != "flash_attention_2" and hasattr(processor.audio_tokenizer, "set_attention_implementation"):
             # Audio-Tokenizer-v2 defaults to flash_attention_2 and only knows
             # sdpa as the alternative.
@@ -115,16 +99,17 @@ class MossTTSModelLoader:
             attn_implementation=attn_implementation,
             dtype=dtype,
             **model_kwargs,
-        ).to(device)
+        )
         model.eval()
+        processor.audio_tokenizer.eval()
 
         # v1.5 Local runs at 48 kHz; everything else at 24 kHz.
         sample_rate = getattr(processor.model_config, "sampling_rate", None) or SAMPLE_RATE
 
-        _current_model = model
-        _current_processor = processor
+        bundle = moss_pipe.MossModelBundle(model, processor.audio_tokenizer)
+        patcher = moss_pipe.MossModelPatcher(bundle, load_device=load_device, offload_device=offload_device)
 
-        return ((model, processor, sample_rate, device, model_id),)
+        return (moss_pipe.MossPipe(patcher, processor, sample_rate, model_id),)
 
     @classmethod
     def IS_CHANGED(cls, model_variant, local_model_path, codec_local_path, check_for_updates=True):

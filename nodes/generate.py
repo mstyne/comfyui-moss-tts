@@ -7,6 +7,7 @@ from ..utils.audio_utils import (
     moss_tensor_to_comfyui_audio,
     resample_if_needed,
 )
+from ..utils import pipe
 from ..utils.backend import language_tag, run_generation
 
 
@@ -56,7 +57,11 @@ class MossTTSGenerate:
         tail_handle,
         reference_audio=None,
     ):
-        model, processor, sample_rate, device, model_id = moss_pipe
+        sample_rate = moss_pipe.sample_rate
+        model_id = moss_pipe.model_id
+        # Through ComfyUI's model manager, so it can evict us later. Needed
+        # before any codec use below, not just before generate().
+        model, processor, device = pipe.load(moss_pipe, max_new_tokens + 2048)
 
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
