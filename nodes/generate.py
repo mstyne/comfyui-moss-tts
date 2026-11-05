@@ -7,7 +7,7 @@ from ..utils.audio_utils import (
     moss_tensor_to_comfyui_audio,
     resample_if_needed,
 )
-from ..utils.backend import run_generation
+from ..utils.backend import language_tag, run_generation
 
 
 class MossTTSGenerate:
@@ -76,7 +76,7 @@ class MossTTSGenerate:
 
         tokens = duration_tokens if enable_duration_control else None
 
-        lang = None if language == "auto" else language
+        lang = language_tag(model_id, language)
 
         user_msg = processor.build_user_message(
             text=text,
@@ -91,7 +91,7 @@ class MossTTSGenerate:
 
         with torch.no_grad():
             outputs = run_generation(
-                model, input_ids, attention_mask, model_id, processor,
+                model, input_ids, attention_mask, model_id,
                 temperature, top_p, top_k, repetition_penalty, max_new_tokens,
             )
 

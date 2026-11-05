@@ -1,4 +1,4 @@
-transformers>=4.40.0
+transformers>=5.20.0
 safetensors
 einops
 scipy
