@@ -61,6 +61,10 @@ The **Audio Tokenizer** (`OpenMOSS-Team/MOSS-Audio-Tokenizer`) is a shared codec
 
 The `language` dropdown lists all 31 languages from the v1.5 model cards (the 1.0 models document the first 20). It is a prompt hint, not a hard switch: `auto` leaves the field unset. The v1.5 models expect full language names in the prompt ("English") rather than codes ("en"), and upstream recommends setting the tag whenever the language is known; the nodes translate the dropdown automatically.
 
+The v1.5 models support inline pause markers such as `[pause 0.5s]` in the text; they pass through the nodes unchanged. Pinyin (`{zhong1}`), IPA, and `tokens`-based duration control from 1.0 still work.
+
+**MOSS-TTS v1.5 (Delay 8B)** runs a text normalizer inside its processor that cannot be disabled: it strips markdown and list markers, joins lines with a Chinese full stop, collapses repeated punctuation ("..." and "?!?!"), and fixes spacing around CJK text. Pause markers, Pinyin, IPA, URLs, and speaker tags survive it. Numbers, dates, and abbreviations are not expanded. No other model normalizes text, so prepare input as if no normalizer existed.
+
 ---
 
 ## Nodes
