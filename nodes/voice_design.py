@@ -4,6 +4,7 @@ import comfy.model_management as mm
 from ..utils.audio_utils import apply_handles, moss_tensor_to_comfyui_audio
 from ..utils import pipe
 from ..utils.backend import language_tag, run_generation
+from ..utils.constants import LANGUAGE_CHOICES
 
 VOICE_GENERATOR_MODEL_ID = "OpenMOSS-Team/MOSS-VoiceGenerator"
 
@@ -14,7 +15,7 @@ class MossTTSVoiceDesign:
         return {
             "required": {
                 "moss_pipe": ("MOSS_TTS_PIPE",),
-                "language": (["auto", "zh", "en", "ja", "ko"],),
+                "language": (LANGUAGE_CHOICES,),
                 "text": ("STRING", {"default": "", "multiline": True}),
                 "instruction": ("STRING", {"default": "", "multiline": True}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xFFFFFFFFFFFFFFFF}),

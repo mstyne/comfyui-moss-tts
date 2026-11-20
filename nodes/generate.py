@@ -9,6 +9,7 @@ from ..utils.audio_utils import (
 )
 from ..utils import pipe
 from ..utils.backend import language_tag, run_generation
+from ..utils.constants import LANGUAGE_CHOICES
 
 
 class MossTTSGenerate:
@@ -17,7 +18,7 @@ class MossTTSGenerate:
         return {
             "required": {
                 "moss_pipe": ("MOSS_TTS_PIPE",),
-                "language": (["auto", "zh", "en", "ja", "ko"],),
+                "language": (LANGUAGE_CHOICES,),
                 "text": ("STRING", {"default": "", "multiline": True}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xFFFFFFFFFFFFFFFF}),
                 "temperature": ("FLOAT", {"default": 1.7, "min": 0.0, "max": 5.0, "step": 0.01}),

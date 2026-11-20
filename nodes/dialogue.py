@@ -11,6 +11,7 @@ from ..utils.audio_utils import (
 )
 from ..utils import pipe
 from ..utils.backend import language_tag, run_generation
+from ..utils.constants import LANGUAGE_CHOICES
 
 TTSD_MODEL_ID = "OpenMOSS-Team/MOSS-TTSD-v1.0"
 
@@ -109,7 +110,7 @@ class MossTTSDialogue:
         return {
             "required": {
                 "moss_pipe": ("MOSS_TTS_PIPE",),
-                "language": (["auto", "zh", "en", "ja", "ko"],),
+                "language": (LANGUAGE_CHOICES,),
                 "dialogue_text": ("STRING", {"default": "", "multiline": True}),
                 "speaker_count": ("INT", {"default": 2, "min": 2, "max": 2, "step": 1}),
                 "normalize_text": ("BOOLEAN", {"default": True}),

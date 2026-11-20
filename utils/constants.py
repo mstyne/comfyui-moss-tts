@@ -27,12 +27,46 @@ V15_MODEL_IDS = {
     "OpenMOSS-Team/MOSS-TTS-Local-Transformer-v1.5",
 }
 
+# Every language listed on the MOSS-TTS v1.5 model card (31 languages).
+# The 1.0 models document the first 20; the remainder were added in v1.5.
+# Keys are the ISO codes passed to the 1.0 models; values are the full names
+# passed to the v1.5 models. The dropdown keeps the original four first.
 LANGUAGE_NAMES = {
     "zh": "Chinese",
     "en": "English",
     "ja": "Japanese",
     "ko": "Korean",
+    "ar": "Arabic",
+    "cs": "Czech",
+    "da": "Danish",
+    "de": "German",
+    "el": "Greek",
+    "es": "Spanish",
+    "fa": "Persian",
+    "fr": "French",
+    "hu": "Hungarian",
+    "it": "Italian",
+    "pl": "Polish",
+    "pt": "Portuguese",
+    "ru": "Russian",
+    "sv": "Swedish",
+    "tr": "Turkish",
+    # Added in v1.5
+    "yue": "Cantonese",
+    "fi": "Finnish",
+    "he": "Hebrew",
+    "hi": "Hindi",
+    "mk": "Macedonian",
+    "ms": "Malay",
+    "nl": "Dutch",
+    "ro": "Romanian",
+    "sw": "Swahili",
+    "tl": "Tagalog",
+    "th": "Thai",
+    "vi": "Vietnamese",
 }
+
+LANGUAGE_CHOICES = ["auto"] + list(LANGUAGE_NAMES)
 
 TOKENS_PER_SECOND = 12.5
 

@@ -59,7 +59,7 @@ Models download automatically from HuggingFace on first use and are cached to `C
 
 The **Audio Tokenizer** (`OpenMOSS-Team/MOSS-Audio-Tokenizer`) is a shared codec required by all 24 kHz models. **MOSS-TTS v1.5 (Local)** instead uses `OpenMOSS-Team/MOSS-Audio-Tokenizer-v2` (48 kHz, stereo, ~8.5 GB). The right codec downloads automatically alongside whichever model you load.
 
-The v1.5 models expect full language names in the prompt ("English") rather than codes ("en"); the nodes translate the language dropdown automatically.
+The `language` dropdown lists all 31 languages from the v1.5 model cards (the 1.0 models document the first 20). It is a prompt hint, not a hard switch: `auto` leaves the field unset. The v1.5 models expect full language names in the prompt ("English") rather than codes ("en"), and upstream recommends setting the tag whenever the language is known; the nodes translate the dropdown automatically.
 
 ---
 
